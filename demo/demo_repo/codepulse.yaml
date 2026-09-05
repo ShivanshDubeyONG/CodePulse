@@ -1,0 +1,9 @@
+setup:
+  command: "python -c \"print('setup ok')\""
+
+benchmark:
+  command: "python benchmark.py"
+
+result:
+  type: "stdout"
+  pattern: "LATENCY=(?P<latency>[0-9.]+)"
