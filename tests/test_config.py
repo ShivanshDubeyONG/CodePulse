@@ -77,9 +77,52 @@ def test_invalid_regex_pattern():
 def test_load_config_from_demo_repo():
     config = load_config("demo/demo_repo")
     assert config.benchmark.command == "python benchmark.py"
+    assert config.benchmark.runs == 5
     assert config.result.type == "stdout"
 
 
 def test_nonexistent_config_file():
     with pytest.raises(ConfigError, match="not found"):
         load_config("nonexistent_directory")
+
+
+def test_config_runs_default():
+    yaml_text = """
+    benchmark:
+      command: "python benchmark.py"
+    """
+    config = parse_config_str(yaml_text)
+    assert config.benchmark.runs == 1
+    assert config.runs is None
+
+
+def test_config_runs_configured_under_benchmark():
+    yaml_text = """
+    benchmark:
+      command: "python benchmark.py"
+      runs: 7
+    """
+    config = parse_config_str(yaml_text)
+    assert config.benchmark.runs == 7
+
+
+def test_config_runs_configured_top_level():
+    yaml_text = """
+    benchmark:
+      command: "python benchmark.py"
+    runs: 9
+    """
+    config = parse_config_str(yaml_text)
+    assert config.benchmark.runs == 9
+    assert config.runs == 9
+
+
+def test_config_runs_invalid_zero_or_negative():
+    yaml_text = """
+    benchmark:
+      command: "python benchmark.py"
+      runs: 0
+    """
+    with pytest.raises(ConfigError):
+        parse_config_str(yaml_text)
+

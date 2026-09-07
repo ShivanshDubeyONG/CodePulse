@@ -3,6 +3,7 @@ setup:
 
 benchmark:
   command: "python benchmark.py"
+  runs: 5
 
 result:
   type: "stdout"

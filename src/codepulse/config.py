@@ -20,6 +20,7 @@ class SetupConfig(BaseModel):
 class BenchmarkConfig(BaseModel):
     """Benchmark command executed inside the sandbox."""
     command: str = Field(..., description="Benchmark command string")
+    runs: int = Field(default=1, ge=1, description="Number of times to execute the benchmark")
 
 
 class ResultConfig(BaseModel):
@@ -36,6 +37,7 @@ class CodePulseConfig(BaseModel):
     setup: Optional[SetupConfig] = Field(default=None)
     benchmark: BenchmarkConfig
     result: ResultConfig = Field(default_factory=ResultConfig)
+    runs: Optional[int] = Field(default=None, ge=1, description="Top-level override for benchmark runs")
 
 
 def parse_config_str(content: str) -> CodePulseConfig:
@@ -56,6 +58,10 @@ def parse_config_str(content: str) -> CodePulseConfig:
 
     if not config.benchmark.command.strip():
         raise ConfigError("benchmark.command cannot be empty")
+
+    if config.runs is not None:
+        if not ("benchmark" in data and isinstance(data["benchmark"], dict) and "runs" in data["benchmark"]):
+            config.benchmark.runs = config.runs
 
     try:
         re.compile(config.result.pattern)
